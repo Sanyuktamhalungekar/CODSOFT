@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Tic Tac Toe Pro</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#667eea,#52a24b);
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.container{
+background:#fff;
+padding:30px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
+text-align:center;
+width:420px;
+}
+
+h1{
+color:#1e293b;
+margin-bottom:15px;
+}
+
+.scoreboard{
+display:flex;
+justify-content:space-around;
+margin-bottom:15px;
+font-weight:bold;
+}
+
+.scoreboard div{
+background:#f1f5f9;
+padding:10px;
+border-radius:10px;
+width:90px;
+}
+
+.board{
+display:grid;
+grid-template-columns:repeat(3,100px);
+gap:8px;
+justify-content:center;
+margin:20px 0;
+}
+
+.cell{
+width:100px;
+height:100px;
+background:#e2e8f0;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:2.5rem;
+font-weight:bold;
+cursor:pointer;
+border-radius:12px;
+transition:0.3s;
+}
+
+.cell:hover{
+background:#bfdbfe;
+transform:scale(1.05);
+}
+
+.winner{
+background:#22c55e !important;
+color:white;
+}
+
+#status{
+font-size:18px;
+font-weight:bold;
+margin-bottom:15px;
+color:#0f172a;
+}
+
+.buttons{
+display:flex;
+justify-content:center;
+gap:10px;
+}
+
+button{
+padding:10px 18px;
+border:none;
+border-radius:8px;
+font-size:15px;
+cursor:pointer;
+color:rgb(18, 16, 17);
+}
+
+.restart{
+background:#2563eb;
+}
+
+.newgame{
+background:#16a34a;
+}
+
+button:hover{
+opacity:0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎮 AI Tic Tac Toe</h1>
+
+<div class="scoreboard">
+<div>Player<br><span id="playerScore">0</span></div>
+<div>AI<br><span id="aiScore">0</span></div>
+<div>Draw<br><span id="drawScore">0</span></div>
+</div>
+
+<div id="status">Your Turn (X)</div>
+
+<div class="board">
+<div class="cell" data-index="0"></div>
+<div class="cell" data-index="1"></div>
+<div class="cell" data-index="2"></div>
+<div class="cell" data-index="3"></div>
+<div class="cell" data-index="4"></div>
+<div class="cell" data-index="5"></div>
+<div class="cell" data-index="6"></div>
+<div class="cell" data-index="7"></div>
+<div class="cell" data-index="8"></div>
+</div>
+
+<div class="buttons">
+<button class="restart" onclick="restartGame()">Restart</button>
+<button class="newgame" onclick="newGame()">New Game</button>
+</div>
+
+</div>
+
+<script>
+
+const cells=document.querySelectorAll(".cell");
+const statusText=document.getElementById("status");
+
+let board=["","","","","","","","",""];
+let gameOver=false;
+
+let playerScore=0;
+let aiScore=0;
+let drawScore=0;
+
+const human="X";
+const ai="O";
+
+cells.forEach(cell=>{
+cell.addEventListener("click",playerMove);
+});
+
+function playerMove(){
+
+let index=this.dataset.index;
+
+if(board[index]!=="" || gameOver) return;
+
+board[index]=human;
+this.textContent=human;
+
+if(checkWinner(board,human)){
+playerScore++;
+document.getElementById("playerScore").textContent=playerScore;
+statusText.textContent="🎉 You Win!";
+gameOver=true;
+return;
+}
+
+if(isDraw()){
+drawScore++;
+document.getElementById("drawScore").textContent=drawScore;
+statusText.textContent="🤝 Draw!";
+gameOver=true;
+return;
+}
+
+statusText.textContent="🤖 AI Thinking...";
+setTimeout(aiMove,500);
+}
+
+function aiMove(){
+
+let bestMove=minimax(board,ai).index;
+
+board[bestMove]=ai;
+cells[bestMove].textContent=ai;
+
+if(checkWinner(board,ai)){
+aiScore++;
+document.getElementById("aiScore").textContent=aiScore;
+statusText.textContent="🤖 AI Wins!";
+gameOver=true;
+return;
+}
+
+if(isDraw()){
+drawScore++;
+document.getElementById("drawScore").textContent=drawScore;
+statusText.textContent="🤝 player Wins!";
+gameOver=true;
+return;
+}
+
+statusText.textContent="Your Turn (X)";
+}
+
+function minimax(newBoard,player){
+
+let emptySpots=newBoard
+.map((v,i)=>v===""?i:null)
+.filter(v=>v!==null);
+
+if(checkWinnerSimple(newBoard,human)){
+return {score:-10};
+}
+
+if(checkWinnerSimple(newBoard,ai)){
+return {score:10};
+}
+
+if(emptySpots.length===0){
+return {score:0};
+}
+
+let moves=[];
+
+for(let i=0;i<emptySpots.length;i++){
+
+let move={};
+move.index=emptySpots[i];
+
+newBoard[emptySpots[i]]=player;
+
+if(player===ai){
+move.score=minimax(newBoard,human).score;
+}else{
+move.score=minimax(newBoard,ai).score;
+}
+
+newBoard[emptySpots[i]]="";
+moves.push(move);
+}
+
+let bestMove;
+
+if(player===ai){
+
+let bestScore=-10000;
+
+for(let i=0;i<moves.length;i++){
+if(moves[i].score>bestScore){
+bestScore=moves[i].score;
+bestMove=i;
+}
+}
+
+}else{
+
+let bestScore=10000;
+
+for(let i=0;i<moves.length;i++){
+if(moves[i].score<bestScore){
+bestScore=moves[i].score;
+bestMove=i;
+}
+}
+}
+
+return moves[bestMove];
+}
+
+function checkWinner(board,player){
+
+const wins=[
+[0,1,2],[3,4,5],[6,7,8],
+[0,3,6],[1,4,7],[2,5,8],
+[0,4,8],[2,4,6]
+];
+
+for(let combo of wins){
+
+if(combo.every(index=>board[index]===player)){
+
+combo.forEach(index=>{
+cells[index].classList.add("winner");
+});
+
+return true;
+}
+}
+
+return false;
+}
+
+function checkWinnerSimple(board,player){
+
+const wins=[
+[0,1,2],[3,4,5],[6,7,8],
+[0,3,6],[1,4,7],[2,5,8],
+[0,4,8],[2,4,6]
+];
+
+return wins.some(combo=>
+combo.every(index=>board[index]===player)
+);
+}
+
+function isDraw(){
+return board.every(cell=>cell!=="");
+}
+
+function restartGame(){
+
+board=["","","","","","","","",""];
+gameOver=false;
+
+cells.forEach(cell=>{
+cell.textContent="";
+cell.classList.remove("winner");
+});
+
+statusText.textContent="Your Turn (X)";
+}
+
+function newGame(){
+
+playerScore=0;
+aiScore=0;
+drawScore=0;
+
+document.getElementById("playerScore").textContent="0";
+document.getElementById("aiScore").textContent="0";
+document.getElementById("drawScore").textContent="0";
+
+restartGame();
+}
+
+</script>
+
+</body>
+</html>
