@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodSoft Assistant</title>
+
+<style>
+body{
+    background:#0f172a;
+    font-family:Arial,sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+
+.chatbot{
+    width:450px;
+    background:white;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 0 20px rgba(0,0,0,0.3);
+}
+
+.header{
+    background:#4f46e5;
+    color:white;
+    text-align:center;
+    padding:15px;
+    font-size:22px;
+    font-weight:bold;
+}
+
+#messages{
+    height:450px;
+    overflow-y:auto;
+    padding:15px;
+    background:#f8fafc;
+}
+
+.user{
+    text-align:right;
+    margin:10px;
+}
+
+.user p{
+    display:inline-block;
+    background:#4f46e5;
+    color:white;
+    padding:10px;
+    border-radius:15px;
+}
+
+.bot{
+    text-align:left;
+    margin:10px;
+}
+
+.bot p{
+    display:inline-block;
+    background:#e2e8f0;
+    padding:10px;
+    border-radius:15px;
+}
+
+.input-area{
+    display:flex;
+    padding:10px;
+}
+
+input{
+    flex:1;
+    padding:10px;
+    font-size:16px;
+}
+
+button{
+    padding:10px 20px;
+    background:#4f46e5;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#3730a3;
+}
+</style>
+</head>
+
+<body>
+
+<div class="chatbot">
+
+    <div class="header">
+        🤖 CodSoft Assistant : Sanyukta
+        <br>
+        <small>Rule Based Chatbot</small>
+    </div>
+
+    <div id="messages"></div>
+
+    <div class="input-area">
+        <input type="text" id="input" placeholder="Ask me anything...">
+        <button onclick="chat()">Send</button>
+    </div>
+
+</div>
+
+<script>
+function chat() {
+
+    let input = document.getElementById("input");
+    let message = input.value.trim();
+
+    if(message === "") return;
+
+    let messages = document.getElementById("messages");
+
+    messages.innerHTML += `
+        <div class="user">
+            <p>${message}</p>
+        </div>
+    `;
+
+    let text = message.toLowerCase();
+    let reply = "";
+
+    if(text.includes("hi") || text.includes("hello")){
+        reply = "Hello! Welcome to CodSoft Assistant.";
+    }
+    else if(text.includes("name")){
+        reply = "My name is CodSoft Assistant.";
+    }
+    else if(text.includes("course")){
+        reply = "I can help you with Web Development projects.";
+    }
+    else if(text.includes("bye")){
+        reply = "Goodbye! Have a nice day.";
+    }
+    else{
+        reply = "Sorry, I don't understand that question.";
+    }
+
+    messages.innerHTML += `
+        <div class="bot">
+            <p>${reply}</p>
+        </div>
+    `;
+
+    input.value = "";
+    messages.scrollTop = messages.scrollHeight;
+}
+</script>
+
+</body>
+</html>
